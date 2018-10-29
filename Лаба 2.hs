@@ -1,10 +1,10 @@
 toDecimal:: Int -> [Char] -> [Char]
-toDecimal base snumber = if (base < 2 || base > 62) then error "Incorrect base"
+toDecimal base snumber = if (base <= 1 || base > 62) then error "Incorrect base"
                          else helper1 base snumber 0 1
  where 
   helper1 b a chislo k = helper2 b (reverse a) chislo k
   helper2 b [] chislo k = show chislo
-  helper2 b (x:xs) chislo k = if (number x > base) then error "Incorrect number"
+  helper2 b (x:xs) chislo k = if (number x >= base) then error "Incorrect number"
                               else helper2 b xs (chislo + ((number x) * k)) (k*b)
    where
     number a = if a >= '0' && a <= '9' then (fromEnum a - 48)
@@ -17,7 +17,7 @@ fromDecimal toBase snumber = helper2 toBase snumber 0
  where 
   helper2 b ['0'] chislo = snumber;
   helper2 b [] chislo = toOtherBase b chislo []
-  helper2 b (x:xs) chislo = if (b > 61 || b < 2) then error "Ti sovsem durak? Incorrect base"
+  helper2 b (x:xs) chislo = if (b > 61 || b <= 1) then error "Ti sovsem durak? Incorrect base"
                             else if ( x > '9' || x < '0') then error "Ti sovsem durak? Incorrect number"
                             else helper2 b xs (((fromEnum x) - 48) + chislo*10)
                             

@@ -1,4 +1,4 @@
-square:: (Ord a, Floating a) => a -> a -> a -> [a]
+square:: Num a => a -> a -> a -> [a]
 square a b c 
           | a == 0 && b == 0 = error "No roots"
           | a == 0 = [-c/b , -c/b]

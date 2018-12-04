@@ -1,33 +1,31 @@
-toDecimal:: Int -> [Char] -> [Char]
-toDecimal base snumber = if (base <= 1 || base > 62) then error "Incorrect base"
-                         else helper1 base snumber 0 1
- where 
-  helper1 b a chislo k = helper2 b (reverse a) chislo k
-  helper2 b [] chislo k = show chislo
-  helper2 b (x:xs) chislo k = if (number x >= base) then error "Incorrect number"
-                              else helper2 b xs (chislo + ((number x) * k)) (k*b)
-   where
-    number a = if a >= '0' && a <= '9' then (fromEnum a - 48)
-               else if a >= 'a' && a <= 'z' then (fromEnum a - 87)
-               else (fromEnum a - 65 + 36)
+import Data.Char
 
------------------------------------------------------------------------------------------------
-fromDecimal:: Int -> [Char] -> [Char]
-fromDecimal toBase snumber = helper2 toBase snumber 0 
- where 
-  helper2 b ['0'] chislo = snumber;
-  helper2 b [] chislo = toOtherBase b chislo []
-  helper2 b (x:xs) chislo = if (b > 61 || b <= 1) then error "Ti sovsem durak? Incorrect base"
-                            else if ( x > '9' || x < '0') then error "Ti sovsem durak? Incorrect number"
-                            else helper2 b xs (((fromEnum x) - 48) + chislo*10)
-                            
-  toOtherBase:: Int -> Int -> [Char] -> [Char]
-  toOtherBase b 0 a = a
-  toOtherBase b chislo a = toOtherBase b (div chislo b) ((toEnum(godHelp (mod chislo b) )::Char):a)
+toDecimal:: Int -> String -> String
+toDecimal base snumber = if (base <= 1 || base > 62) then error "Incorrect base" 
+                          else if any (\x -> (toDec x) >= base) snumber then error "Wrong number" else show (foldl (\res x-> base*res + toDec x) 0 snumber)
    where
-   godHelp x = if (x <= 9) then x + 48
-               else if (x <= 35) then x + 97 - 10
-               else x + 65 - 36
+   toDec a = if a >= '0' && a <= '9' then (ord a - 48)
+            else if a >= 'a' && a <= 'z' then (ord a - 87)
+            else (ord a - 65 + 36)
+
+----------------------------------------------------------------------------------------------
+fromDecimal:: Int -> String -> String
+fromDecimal 1 num = if any (\x -> x > '9' || x < '0') num then error "Wrong number"
+                    else toOne (read num::Int) []
+                     where 
+                      toOne:: Int -> String -> String
+                      toOne 0 a = a
+                      toOne num a = toOne (num-1) ('1':a)
+fromDecimal toBase snumber = if any (\x -> x > '9' || x < '0') snumber then error "Wrong number"
+                             else if toBase > 61 || toBase < 1 then error "Wrong Base" 
+                             else toOtherBase toBase (read snumber::Int) []
+                                   where 
+                                    toOtherBase:: Int -> Int -> String -> String
+                                    toOtherBase b 0 a = a
+                                    toOtherBase b num a = toOtherBase b (div num b) ((toEnum(godHelp (mod num b) )::Char):a)
+                                    godHelp x = if (x <= 9) then x + 48
+                                    else if (x <= 35) then x + 97 - 10
+                                    else x + 65 - 36
 ------------------------------------------------------------------------------------------------
 
 convertFromTo:: Int -> Int -> [Char] -> [Char]

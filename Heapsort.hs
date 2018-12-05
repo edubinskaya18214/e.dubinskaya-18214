@@ -1,5 +1,5 @@
 heapsort:: Ord a => [a] -> [a]
-heapsort (x:y:[]) = if x>y then [x,y] else [y,x]
+heapsort (x:[]) = [x]
 heapsort arr = ( head ( largest' arr )):(heapsort (tail ( largest' arr )))
  where
   left arr = arr!!(rightPoint arr - 1)
@@ -15,8 +15,8 @@ heapsort arr = ( head ( largest' arr )):(heapsort (tail ( largest' arr )))
   replase2 arr = if ( point arr > (left arr)) then arr 
                  else (beforePoint arr)++[(left arr)]++(beforeLeft arr)++[(point arr)]
   replase3:: Ord a => [a]->[a]
-  replase3 arr = if (point arr > left arr && point arr > right arr) then arr
-                 else if left arr > point arr && left arr > right arr then (beforePoint arr)++[(left arr)]++(beforeLeft arr)++[(point arr)]++[(right arr)]
+  replase3 arr = if (point arr >= left arr && point arr >= right arr) then arr
+                 else if left arr >= point arr && left arr >= right arr then (beforePoint arr)++[(left arr)]++(beforeLeft arr)++[(point arr)]++[(right arr)]
                  else (beforePoint arr)++[(right arr)]++(beforeLeft arr)++[(point arr)]++[(left arr)]
   largest' arr = largest arr (length arr - 2)
   largest x 0 = x

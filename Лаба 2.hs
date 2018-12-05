@@ -2,7 +2,8 @@ import Data.Char
 
 toDecimal:: Int -> String -> String
 toDecimal base snumber = if (base <= 1 || base > 62) then error "Incorrect base" 
-                          else if any (\x -> (toDec x) >= base) snumber then error "Wrong number" else show (foldl (\res x-> base*res + toDec x) 0 snumber)
+                          else if any (\x -> (toDec x) >= base) snumber then error "Wrong number" 
+                          else show (foldl (\res x-> base*res + toDec x) 0 snumber)
    where
    toDec a = if a >= '0' && a <= '9' then (ord a - 48)
             else if a >= 'a' && a <= 'z' then (ord a - 87)

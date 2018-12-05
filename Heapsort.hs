@@ -1,5 +1,5 @@
 heapsort:: Ord a => [a] -> [a]
-heapsort (x:[]) = [x]
+heapsort (x:y:[]) = if x>y then [x,y] else [y,x]
 heapsort arr = ( head ( largest' arr )):(heapsort (tail ( largest' arr )))
  where
   left arr = arr!!(rightPoint arr - 1)

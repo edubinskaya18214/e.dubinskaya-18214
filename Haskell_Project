@@ -1,0 +1,177 @@
+
+main = wtf
+
+wtf = do
+ putStrLn "            Выберете режим игры: \n            X - играть за 'X' \n            O - играть за 'О'\n            *2 - играть за двоих";
+ str <- getLine
+ if (str == "X" || str == "Х") then do
+  startgame "X"
+ else if (str == "O" || str == "О") then startgame "O"
+ else if (str == "*2") then startgame "*2"
+ else wtf
+ again 1 
+
+again n = do
+ if n == 1 then putStrLn "\n\n            Хотите ли вы начать заного?\n            Y - вернуться к началу\n            N - выйти\n\n"
+ else putStrLn "                Думаю, вы опечатались, что вы хотели ответить?..\n"
+ str <- getLine
+ if str == "Y" then wtf
+ else if str == "N" then putStr " "
+ else again 2
+ 
+ 
+---Функции которые "знают значения"
+p1 field = field!!0
+p2 field = field!!1
+p3 field = field!!2
+p4 field = field!!3
+p5 field = field!!4
+p6 field = field!!5
+p7 field = field!!6
+p8 field = field!!7
+p9 field = field!!8
+
+showField :: [String] -> IO ()
+showField f = putStr ("            +---+---+---+\n            | "++(p1 f)++" | "++(p2 f)++" | "++(p3 f) ++ " |\n            +---+---+---+\n            | "++(p4 f)++" | "++(p5 f)++" | "++(p6 f) ++ " |\n            +---+---+---+\n            | "++(p7 f)++" | "++(p8 f)++" | "++(p9 f) ++ " |\n            +---+---+---+\n\n")
+
+
+makeField f str = (changef (makemove f "X" "O") (fromEnum( head str) - 48) "O")
+
+
+startshowing :: IO ()
+startshowing = putStr ("В свой ход вы должны указывать номер ячейки, в которой хотите походить: \n            +---+---+---+\n            | 1 | 2 | 3 |\n            +---+---+---+\n            | 4 | 5 | 6 |\n            +---+---+---+\n            | 7 | 8 | 9 |\n            +---+---+---+\n")
+
+
+victory ::[String] -> String -> Int
+victory f a = helper f a 0
+  where
+   helper f a 3 = if ((f!!2) == a &&(f!!6) == a && (f!!4) == a) then 1
+                  else if (((f!!0)) == a &&((f!!8)) == a && ((f!!4)) == a) then 2
+                  else 0
+   helper f a n = if (f!!(n*3) == a && f!!(n*3+1) == a && f!!(n*3+2)==a) then 3*n
+                  else if (f!!(n) == a && f!!(n+3) == a && f!!(6+n) == a) then 4*n
+                  else helper f a (n+1)
+                  
+                  
+                  
+gameX :: Int -> [String] -> IO ()
+gameX  0 f = putStr "Похоже, у вас ничья\n"
+
+gameX  n f = do
+  putStr "Ваш ход: ";
+  str <- getLine;
+  putStr "   \n";
+  if ( str == [] || tail str /= [] || (f!!(fromEnum( head str) - 48 - 1)) /= " " || head str > '9' || head str <= '0' ) then do
+    putStrLn "Введите номер свободной ячейки";
+    gameX  n f
+  else do
+    let ch =(fromEnum( head str) - 48)
+    let field = changef f ch "X"
+    showField field
+    if (victory field "X") >= 1 then do
+      putStrLn "Вы победили!";
+    else if n == 1 then gameX  0 f else do{
+     putStrLn "Ход бота";
+     showField (makemove field  "O"  "X");
+     if ( victory (makemove field  "O"  "X") "O" ) > 0 then putStr ("Вы проиграли =(\n");
+     else gameX  (n-1) (makemove field  "O"  "X")    
+    }
+
+gameO n f = do{
+ if ( n == 1) then do{
+  putStr "Ход бота:\n";
+  showField (makemove f "X" "O")
+  }
+ else putStrLn "Введите номер свободной ячейки\n";
+ if ( victory (makemove f "X" "O") "X" ) > 0 then do{
+  putStr ("Вы проиграли =(\n");
+  }
+ else do{
+  if any (" "==) (makemove f "X" "O") then do{
+   putStr "Ваш ход: ";
+   str <- getLine;
+   putStr "   \n";
+   if ( str /= [] && tail str == [] && (f!!(fromEnum( head str) - 48 - 1)) == " " && head str <= '9' && head str >= '0' ) then do
+     {
+     showField (makeField f str);
+     if (victory (makeField f str) "O" >= 1) then putStr "Вы победили!\n";
+     else gameO 1 (makeField f str)
+     }
+   else gameO 5 f
+  }
+  else putStrLn "Похоже, у вас ничья";
+}
+}
+changef:: [a] -> Int -> a -> [a]
+changef f n a = ((take (n-1) f)++[a]++(reverse (take (9 - n) (reverse f ))))
+
+startgame a = do
+ let field = [" "," "," "," "," "," "," "," "," "]
+ putStrLn "\n\n_____________________________________________________________________________________________________________\n\n\n";
+ startshowing
+ putStrLn "\n\n_____________________________________________________________________________________________________________\n\n\n";
+ if a == "X" then gameX 5 field
+ else if a == "O" then gameO 1 field
+ else firstmove field
+
+findthree :: Int -> [String] -> String -> Int    
+findthree 3 f a = -1
+findthree n f a = if (f!!(1+n*3) == a && f!!(0+n*3) == a && f!!(2+n*3) == " ") then 2 + n*3
+                  else if (f!!(1+n*3) == a && f!!(2+n*3) == a && f!!(0+n*3) == " ") then 0 + n*3 
+                  else if (f!!(2+n*3) == a && f!!(0+n*3) == a && f!!(1+n*3) == " ") then n*3 + 1
+                  else findthree (n+1) f a
+
+findthree2:: Int -> [String] -> String -> Int                  
+findthree2 3 f a = -1
+findthree2 n f a = if (f!!(n) == a && f!!(n+3) == a && f!!(6+n) == " ") then 6+n
+                   else if (f!!(n) == a && f!!(n+6) == a && f!!(3+n) == " ") then 3+n
+                   else if (f!!(n+3) == a && f!!(n+6) == a && f!!(0+n) == " ") then 0+n
+                   else findthree2 (n+1) f a
+                   
+findD f a = if  ( ((f!!0)) == a &&(f!!4) == a && (f!!8) == " ") then 8
+            else if (((f!!0)) == a &&((f!!8)) == a && ((f!!4)) == " ") then 4
+            else if ((f!!4) == a &&(f!!8) == a && (f!!0) == " ") then 0
+            else if ((f!!4) == a &&(f!!2) == a && (f!!6) == " ") then 6
+            else if ((f!!4) == a &&(f!!6) == a && (f!!2) == " ") then 2
+            else if ((f!!2) == a &&(f!!6) == a && (f!!4) == " ") then 4
+            else -1
+            
+findnear f a b = helper f a b 1 
+ where
+  helper f a b 8 = error "1111"
+  helper f a b n = if (f!!n == " " && (f!!(n+1) == b || f!!(n-1) == b)) then n
+               else helper f a b (n+1)
+               
+makemove f a b = if ((f!!4) == " ") then ((take (4) f)++[a]++(reverse (take (4) (reverse f ))))
+               else if findthree 0 f a/= -1 then changef f ((findthree 0 f a)+1) a
+               else if findthree2 0 f a /= -1 then changef f ((findthree2 0 f a )+1) a 
+               else if findD f a /= -1 then changef f ((findD f a)+1) a
+               else if findthree 0 f b/= -1 then changef f ((findthree 0 f b)+1) a
+               else if findthree2 0 f b /= -1 then changef f ((findthree2 0 f b)+1) a 
+               else if findD f b /= -1 then changef f ((findD f b)+1) a
+               else changef f ((findnear f a b )+1) a
+ 
+firstmove:: [String] -> IO ()
+firstmove f = do 
+ if (victory f "O" >= 1) then putStrLn "Победил второй игрок"
+ else do
+  putStr "Ход первого игрока: "
+  str <- getLine
+  if ( str /= [] && tail str == [] && (f!!(fromEnum( head str) - 48 - 1)) == " " && head str <= '9' && head str >= '0' ) then do
+   showField (changef f (fromEnum( head str) - 48) "X" )
+   move2 (changef f (fromEnum( head str) - 48) "X" )
+  else firstmove f
+ 
+move2:: [String] -> IO ()
+move2 f = do 
+ if any (" "==) f then do{
+  if (victory f "X" >= 1) then putStrLn "Победил первый игрок";
+  else do
+   putStr "Ход второго игрока: ";
+   str <- getLine
+   if ( str /= [] && tail str == [] && (f!!(fromEnum( head str) - 48 - 1)) == " " && head str <= '9' && head str >= '0' ) then do
+    showField (changef f (fromEnum( head str) - 48) "O" )
+    firstmove (changef f (fromEnum( head str) - 48) "O" )
+   else move2 f
+ } 
+ else putStrLn "Ничья";
